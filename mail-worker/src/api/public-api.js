@@ -63,6 +63,4 @@ const messageHandler = async (c) => {
 	return c.json(mappedResult);
 };
 
-// --- 👇 终极双重保险：同时绑定两个路径 👇 ---
-app.get('/messages', messageHandler);      // 应对 https://nmail.us.ci/messages 这种访问
-app.get('/api/messages', messageHandler);  // 应对 https://nmail.us.ci/api/messages 这种访问
+
