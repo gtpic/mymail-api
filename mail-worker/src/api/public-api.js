@@ -23,46 +23,86 @@ app.post('/public/addUser', async (c) => {
 	return c.json(result.ok());
 });
 
-// --- 👇 提取核心处理逻辑 👇 ---
+// --- 👇 核心处理逻辑 👇 ---
 const messageHandler = async (c) => {
 	const address = c.req.query('address');
-	const key = c.req.query('key');
-	
-	// 1. 鉴权：使用传入的环境变量 api_key 进行校验 (对应您设置的 888)
+
+	// 鉴权：支持 URL ?key= 或 Header Bearer Token
+	const authHeader = c.req.header('Authorization');
+	let key = c.req.query('key');
+
+	if (authHeader && authHeader.startsWith('Bearer ')) {
+		key = authHeader.substring(7);
+	}
+
+	// API KEY 校验
 	if (key !== c.env.api_key) {
-		return c.json({ error: "Unauthorized" }, 401);
+		return c.json({ error: 'Unauthorized' }, 401);
 	}
 
 	if (!address) {
-		return c.json({ error: "Address is required" }, 400);
+		return c.json({ error: 'Address is required' }, 400);
 	}
 
-	// 2. 使用 D1 ORM 直接从数据库查询该随机地址的邮件
-	const emails = await orm(c).select()
+	// D1 查询邮件列表
+	const emails = await orm(c)
+		.select()
 		.from(email)
 		.where(eq(email.toEmail, address))
-		.orderBy(desc(email.emailId)) // 最新的邮件排在最前
+		.orderBy(desc(email.emailId))
 		.limit(10)
 		.all();
 
-	// 3. 字段精准映射 (100% 模拟简化版 worker.js 的返回格式)
-	const mappedResult = emails.map(e => ({
-		id: e.emailId,                 
-		message_id: e.messageId || "", 
-		source: e.sendEmail,           // 关键：发件人地址映射为 source
-		to: e.toEmail,                 
+	// 数据映射
+	const mappedResult = emails.map((e) => ({
+		id: e.emailId,
+		message_id: e.messageId || '',
+		source: e.sendEmail,
+		to: e.toEmail,
 		sender: e.name ? `${e.name} <${e.sendEmail}>` : e.sendEmail,
-		subject: e.subject,            
-		text: e.text || e.content,     // 关键：纯文本正文，方便提取验证码
+		subject: e.subject,
+		text: e.text || e.content,
 		html: e.html || e.content,
-		created_at: e.createTime,      // 关键：时间映射为 created_at
-		attachments: []                
+		created_at: e.createTime,
+		attachments: [],
 	}));
 
-	// 核心：直接返回数组，不加任何包装
+	// 返回格式兼容（带 Authorization → messages 包装）
+	if (authHeader) {
+		return c.json({ messages: mappedResult });
+	}
+
 	return c.json(mappedResult);
 };
 
-// --- 👇 终极双重保险：同时绑定两个路径 👇 ---
-app.get('/messages', messageHandler);      // 应对 https://xxx.xxx/messages 这种访问
-app.get('/api/messages', messageHandler);  // 应对 https://xxx.xxx/api/messages 这种访问
+// --- 路由绑定 ---
+app.get('/messages', messageHandler);
+app.get('/api/messages', messageHandler);
+
+// --- 👇 删除邮件接口 👇 ---
+const deleteHandler = async (c) => {
+	const address = c.req.query('address');
+
+	const authHeader = c.req.header('Authorization');
+	let key = c.req.query('key');
+
+	if (authHeader && authHeader.startsWith('Bearer ')) {
+		key = authHeader.substring(7);
+	}
+
+	if (key !== c.env.api_key) {
+		return c.json({ error: 'Unauthorized' }, 401);
+	}
+
+	if (address) {
+		await orm(c)
+			.delete(email)
+			.where(eq(email.toEmail, address));
+	}
+
+	return c.json({ success: true });
+};
+
+// --- DELETE 路由绑定 ---
+app.delete('/messages', deleteHandler);
+app.delete('/api/messages', deleteHandler);
