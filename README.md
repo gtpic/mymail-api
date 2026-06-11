@@ -7,3 +7,12 @@
 - 临时邮箱 API (Temp Mail API)：注册机圈子最常用的叫法。相当于你自己搭建了一个类似于 Guerrilla Mail 或 Temp-Mail 的私人后端接口。
 - 自动接码接口 / 收信 API：专门用于全自动接收注册验证码、激活链接的无头（Headless）服务。
 - Catch-All 域名邮箱后端：因为配置了特定的前缀或全域接收，配合这个 API，可以无限生成类似 random123@example.com 的邮箱并瞬间通过 API 读取验证码。
+
+Cloudflare Email Worker（自建，免费）
+EMAIL_DOMAIN =example.com
+EMAIL_API_URL =https://mail.example.com
+EMAIL_API_TOKEN =888
+或是
+邮箱域名：example.com
+收码API地址：https://mail.example.com
+收码密钥：888
