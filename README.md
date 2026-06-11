@@ -8,11 +8,25 @@
 - 自动接码接口 / 收信 API：专门用于全自动接收注册验证码、激活链接的无头（Headless）服务。
 - Catch-All 域名邮箱后端：因为配置了特定的前缀或全域接收，配合这个 API，可以无限生成类似 random123@example.com 的邮箱并瞬间通过 API 读取验证码。
 
-#### Cloudflare Email Worker（自建，免费）
-- EMAIL_DOMAIN =example.com
-- EMAIL_API_URL =https://mail.example.com
-- EMAIL_API_TOKEN =888
-#### 或是
-- 邮箱域名：example.com
-- 收码API地址：https://mail.example.com
-- 收码密钥：888
+<h4 id="h4-cloudflare-email-worker-" style="box-sizing: border-box; margin-bottom: 16px; color: rgba(0, 0, 0, 0.85); position: relative; line-height: 1.4; font-size: 1.25em; font-family: 'Microsoft YaHei', Helvetica, 'Meiryo UI', 'Malgun Gothic', 'Segoe UI', 'Trebuchet MS', Monaco, monospace, Tahoma, STXihei, 华文细黑, STHeiti, 'Helvetica Neue', 'Droid Sans', 'wenquanyi micro hei', FreeSans, Arimo, Arial, SimSun, 宋体, Heiti, 黑体, sans-serif; margin-top: 0px !important;">Cloudflare Email Worker（自建，免费）</h4>
+<ul style="box-sizing: border-box; margin-top: 0px; padding: 0px 0px 0px 2em; color: #333333; font-family: 'Microsoft YaHei', Helvetica, 'Meiryo UI', 'Malgun Gothic', 'Segoe UI', 'Trebuchet MS', Monaco, monospace, Tahoma, STXihei, 华文细黑, STHeiti, 'Helvetica Neue', 'Droid Sans', 'wenquanyi micro hei', FreeSans, Arimo, Arial, SimSun, 宋体, Heiti, 黑体, sans-serif; margin-bottom: 0px !important;">
+<li style="box-sizing: border-box;">
+<pre>EMAIL_DOMAIN =example.com</pre>
+</li>
+<li style="box-sizing: border-box;">
+<pre>EMAIL_API_URL =https://mail.example.com</pre>
+</li>
+<li style="box-sizing: border-box;">
+<pre>EMAIL_API_TOKEN =888</pre>
+<h4 id="h4-u6216u662F" style="box-sizing: border-box; margin-top: 1em; margin-bottom: 16px; color: rgba(0, 0, 0, 0.85); position: relative; line-height: 1.4; font-size: 1.25em;"><a class="reference-link" style="box-sizing: border-box; color: #4183c4; background-image: initial; background-position: 0px 0px; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial; outline: none; cursor: pointer; transition: color 0.3s ease 0s; touch-action: manipulation;" name="或是"></a>或是</h4>
+</li>
+<li style="box-sizing: border-box;">
+<pre>邮箱域名：example.com</pre>
+</li>
+<li style="box-sizing: border-box;">
+<pre>收码API地址：https://mail.example.com</pre>
+</li>
+<li style="box-sizing: border-box;">
+<pre>收码密钥：888</pre>
+</li>
+</ul>
