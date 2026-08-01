@@ -325,6 +325,21 @@ const zh = {
     searchUser: '搜索用户',
     searchEmail: '搜索邮箱',
     searchSender: '搜索发件人',
-    userEmail: '用户邮箱'
+    userEmail: '用户邮箱',
+    batchAddUser: '批量添加用户',
+    batchAddDesc: '每行一个用户，格式：邮箱前缀,密码',
+    batchAddPlaceholder: 'user1,pass123\nuser2,pass456\nuser3,pass789',
+    batchAddProgress: '添加进度',
+    batchAddSuccess: '成功',
+    batchAddFail: '失败',
+    batchAddTotal: '共 {total} 个',
+    batchAddCompleted: '添加完成',
+    batchAddSuccessCount: '成功 {success} 个',
+    batchAddFailCount: '失败 {fail} 个',
+    batchAddRemaining: '剩余 {count} 个',
+    batchAddProcessing: '正在添加中...',
+    emptyUserList: '用户列表不能为空',
+    emptyEmailOrPwd: '邮箱或密码不能为空',
+    batchFormatError: '格式错误，每行应为：邮箱前缀,密码'
 }
 export default zh

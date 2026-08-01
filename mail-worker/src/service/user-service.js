@@ -366,6 +366,65 @@ const userService = {
 
 	},
 
+	async batchAdd(c, params) {
+
+		const { users, type } = params;
+
+		if (!Array.isArray(users) || users.length === 0) {
+			throw new BizError(t('emptyUserList'));
+		}
+
+		const role = await roleService.selectById(c, type);
+
+		if (!role) {
+			throw new BizError(t('roleNotExist'));
+		}
+
+		const results = [];
+
+		for (const item of users) {
+			const { email, password } = item;
+			try {
+				if (!email || !password) {
+					results.push({ email, success: false, message: t('emptyEmailOrPwd') });
+					continue;
+				}
+
+				if (password.length < 6) {
+					results.push({ email, success: false, message: t('pwdMinLength') });
+					continue;
+				}
+
+				if (!c.env.domain.includes(emailUtils.getDomain(email))) {
+					results.push({ email, success: false, message: t('notEmailDomain') });
+					continue;
+				}
+
+				const accountRow = await accountService.selectByEmailIncludeDel(c, email);
+
+				if (accountRow && accountRow.isDel === isDel.DELETE) {
+					results.push({ email, success: false, message: t('isDelUser') });
+					continue;
+				}
+
+				if (accountRow) {
+					results.push({ email, success: false, message: t('isRegAccount') });
+					continue;
+				}
+
+				const { salt, hash } = await saltHashUtils.hashPassword(password);
+				const userId = await userService.insert(c, { email, password: hash, salt, type });
+				await userService.updateUserInfo(c, userId, true);
+				await accountService.insert(c, { userId: userId, email, type, name: emailUtils.getName(email) });
+				results.push({ email, success: true, message: '' });
+			} catch (e) {
+				results.push({ email, success: false, message: e.message || 'Unknown error' });
+			}
+		}
+
+		return results;
+	},
+
 	listByRegKeyId(c, regKeyId) {
 		return orm(c)
 			.select({email: user.email,createTime: user.createTime})

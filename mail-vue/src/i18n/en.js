@@ -325,7 +325,22 @@ const en = {
     searchUser: 'Search by user',
     searchEmail: 'Search by Email',
     searchSender: 'Search by Sender',
-    userEmail: 'Email Address'
+    userEmail: 'Email Address',
+    batchAddUser: 'Batch Add Users',
+    batchAddDesc: 'One user per line, format: email_prefix,password',
+    batchAddPlaceholder: 'user1,pass123\nuser2,pass456\nuser3,pass789',
+    batchAddProgress: 'Progress',
+    batchAddSuccess: 'Success',
+    batchAddFail: 'Failed',
+    batchAddTotal: 'Total {total}',
+    batchAddCompleted: 'Completed',
+    batchAddSuccessCount: '{success} succeeded',
+    batchAddFailCount: '{fail} failed',
+    batchAddRemaining: '{count} remaining',
+    batchAddProcessing: 'Processing...',
+    emptyUserList: 'User list cannot be empty',
+    emptyEmailOrPwd: 'Email or password cannot be empty',
+    batchFormatError: 'Format error, each line should be: email_prefix,password'
 }
 
 export default en

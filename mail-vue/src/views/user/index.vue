@@ -2,6 +2,7 @@
   <div class="user-box">
     <div class="header-actions">
       <Icon class="icon" icon="ion:add-outline" width="23" height="23" @click="openAdd"/>
+      <Icon class="icon" icon="mdi:account-multiple-plus-outline" width="23" height="23" @click="openBatchAdd"/>
       <div class="search">
         <el-input
             v-model="params.email"
@@ -225,6 +226,63 @@
         />
       </div>
     </el-dialog>
+    <el-dialog v-model="showBatchAdd" :title="$t('batchAddUser')" @closed="resetBatchAddForm">
+      <div class="container">
+        <div class="batch-add-desc">{{ $t('batchAddDesc') }}</div>
+        <div class="batch-domain-row">
+          <el-select
+              v-model="batchAddForm.suffix"
+              :placeholder="$t('select')"
+          >
+            <el-option
+                v-for="item in domainList"
+                :key="item"
+                :label="item"
+                :value="item"
+            />
+          </el-select>
+        </div>
+        <el-input
+            v-model="batchAddForm.text"
+            type="textarea"
+            :rows="8"
+            :placeholder="$t('batchAddPlaceholder')"
+            :disabled="batchProcessing"
+        />
+        <el-select v-model="batchAddForm.type" :placeholder="$t('perm')" :disabled="batchProcessing">
+          <el-option v-for="item in roleList" :label="item.name" :value="item.roleId" :key="item.roleId"/>
+        </el-select>
+        <div v-if="batchProcessing || batchResult" class="batch-progress-section">
+          <div class="batch-progress-header">
+            <span>{{ batchProcessing ? $t('batchAddProcessing') : $t('batchAddCompleted') }}</span>
+            <span>{{ $t('batchAddTotal', { total: batchTotal }) }}</span>
+          </div>
+          <el-progress
+              :percentage="batchPercentage"
+              :status="batchProcessing ? '' : (batchFailCount > 0 ? 'warning' : 'success')"
+              :stroke-width="20"
+              :text-inside="true"
+          />
+          <div class="batch-progress-info">
+            <span class="batch-success">{{ $t('batchAddSuccessCount', { success: batchSuccessCount }) }}</span>
+            <span class="batch-fail" v-if="batchFailCount > 0">{{ $t('batchAddFailCount', { fail: batchFailCount }) }}</span>
+            <span v-if="batchProcessing">{{ $t('batchAddRemaining', { count: batchTotal - batchProcessedCount }) }}</span>
+          </div>
+          <div v-if="batchErrors.length > 0" class="batch-errors">
+            <el-scrollbar max-height="150px">
+              <div v-for="err in batchErrors" :key="err.email" class="batch-error-item">
+                <span>{{ err.email }}</span>
+                <span class="error-msg">{{ err.message }}</span>
+              </div>
+            </el-scrollbar>
+          </div>
+        </div>
+        <el-button class="btn" type="primary" @click="submitBatchAdd" :loading="batchProcessing"
+                    :disabled="batchProcessing">
+          {{ batchProcessing ? $t('batchAddProcessing') : $t('add') }}
+        </el-button>
+      </div>
+    </el-dialog>
     <el-dialog class="account-dialog" v-model="detailsShow" :title="t('userDetails')"  >
       <div class="details">
         <div v-if="userDetails.username"><span class="details-item-title">LinuxDo:</span>
@@ -376,7 +434,8 @@ import {
   userRestSendCount,
   userRestore,
   userDeleteAccount,
-  userAllAccount
+  userAllAccount,
+  userBatchAdd
 } from '@/request/user.js'
 import {roleSelectUse} from "@/request/role.js";
 import {Icon} from "@iconify/vue";
@@ -450,6 +509,12 @@ const params = reactive({
   timeSort: 0,
   status: -1
 })
+
+const batchAddForm = reactive({
+  text: '',
+  suffix: settingStore.domainList[0],
+  type: null,
+})
 let chooseUser = {}
 const userForm = reactive({
   password: null,
@@ -458,8 +523,17 @@ const userForm = reactive({
 })
 
 const showAdd = ref(false)
+const showBatchAdd = ref(false)
 const accountShow = ref(false)
 const addLoading = ref(false);
+const batchProcessing = ref(false)
+const batchResult = ref(false)
+const batchTotal = ref(0)
+const batchProcessedCount = ref(0)
+const batchSuccessCount = ref(0)
+const batchFailCount = ref(0)
+const batchErrors = ref([])
+const batchPercentage = ref(0)
 const setTypeShow = ref(false)
 const setPwdShow = ref(false)
 const pagerCount = ref(10)
@@ -756,6 +830,120 @@ function submit() {
   })
 }
 
+function openBatchAdd() {
+  showBatchAdd.value = true
+}
+
+function resetBatchAddForm() {
+  batchAddForm.text = ''
+  batchAddForm.suffix = settingStore.domainList[0]
+  batchAddForm.type = null
+  batchProcessing.value = false
+  batchResult.value = false
+  batchTotal.value = 0
+  batchProcessedCount.value = 0
+  batchSuccessCount.value = 0
+  batchFailCount.value = 0
+  batchErrors.value = []
+  batchPercentage.value = 0
+}
+
+function parseBatchUsers(text) {
+  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+  const users = []
+  for (const line of lines) {
+    const parts = line.split(',')
+    if (parts.length >= 2) {
+      const email = parts[0].trim()
+      const password = parts.slice(1).join(',').trim()
+      if (email && password) {
+        users.push({ email: email + batchAddForm.suffix, password })
+      }
+    }
+  }
+  return users
+}
+
+async function submitBatchAdd() {
+  if (!batchAddForm.text.trim()) {
+    ElMessage({
+      message: t('emptyUserList'),
+      type: "error",
+      plain: true
+    })
+    return
+  }
+
+  if (!batchAddForm.type) {
+    ElMessage({
+      message: t('emptyRole'),
+      type: "error",
+      plain: true
+    })
+    return
+  }
+
+  const allUsers = parseBatchUsers(batchAddForm.text)
+
+  if (allUsers.length === 0) {
+    ElMessage({
+      message: t('batchFormatError'),
+      type: "error",
+      plain: true
+    })
+    return
+  }
+
+  batchProcessing.value = true
+  batchResult.value = true
+  batchTotal.value = allUsers.length
+  batchProcessedCount.value = 0
+  batchSuccessCount.value = 0
+  batchFailCount.value = 0
+  batchErrors.value = []
+  batchPercentage.value = 0
+
+  const batchSize = 20
+  const totalBatches = Math.ceil(allUsers.length / batchSize)
+
+  for (let i = 0; i < totalBatches; i++) {
+    const start = i * batchSize
+    const end = Math.min(start + batchSize, allUsers.length)
+    const batch = allUsers.slice(start, end)
+
+    try {
+      const results = await userBatchAdd({ users: batch, type: batchAddForm.type })
+
+      for (const result of results) {
+        batchProcessedCount.value++
+        if (result.success) {
+          batchSuccessCount.value++
+        } else {
+          batchFailCount.value++
+          batchErrors.value.push({ email: result.email, message: result.message })
+        }
+      }
+    } catch (e) {
+      for (const user of batch) {
+        batchProcessedCount.value++
+        batchFailCount.value++
+        batchErrors.value.push({ email: user.email, message: e.message || 'Request failed' })
+      }
+    }
+
+    batchPercentage.value = Math.round((batchProcessedCount.value / batchTotal.value) * 100)
+  }
+
+  batchProcessing.value = false
+
+  ElMessage({
+    message: t('batchAddCompleted') + ' - ' + t('batchAddSuccessCount', { success: batchSuccessCount.value }) + (batchFailCount.value > 0 ? ', ' + t('batchAddFailCount', { fail: batchFailCount.value }) : ''),
+    type: batchFailCount.value > 0 ? 'warning' : 'success',
+    plain: true
+  })
+
+  getUserList(false)
+}
 
 function formatSendType(user) {
   if (user.sendAction.sendType === 'day') return t('daily')
@@ -1205,6 +1393,70 @@ function adjustWidth() {
   width: 100px;
   opacity: 0;
   pointer-events: none;
+}
+
+.batch-add-desc {
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 5px;
+}
+
+.batch-domain-row {
+  margin-bottom: 5px;
+}
+
+.batch-progress-section {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--el-fill-color-lighter);
+}
+
+.batch-progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #606266;
+}
+
+.batch-progress-info {
+  display: flex;
+  gap: 15px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #606266;
+}
+
+.batch-success {
+  color: var(--el-color-success);
+}
+
+.batch-fail {
+  color: var(--el-color-danger);
+}
+
+.batch-errors {
+  margin-top: 10px;
+  border-top: 1px solid var(--el-border-color-lighter);
+  padding-top: 8px;
+}
+
+.batch-error-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+  color: #606266;
+}
+
+.error-msg {
+  color: var(--el-color-danger);
+  max-width: 60%;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .loading {
