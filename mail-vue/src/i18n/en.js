@@ -328,7 +328,7 @@ const en = {
     userEmail: 'Email Address',
     batchAddUser: 'Batch Add Users',
     batchAddDesc: 'One user per line, supported formats:\nemail_prefix,password (first comma is delimiter, password can contain commas)\nemail_prefix---password\nemail_prefix<Tab>password\nIf email already contains a domain, it will be used as-is; otherwise the selected domain below is appended',
-    batchAddPlaceholder: 'user1,pass123\nuser2,mypass,extra\nuser3---pass456\nuser4\tpass789\nuser5@example.com,mypass',
+    batchAddPlaceholder: 'user1,pass123\nuser2,mypass,extra\nuser3---pass456\nuser4\tpass789\nuser5,mypass',
     batchAddProgress: 'Progress',
     batchAddSuccess: 'Success',
     batchAddFail: 'Failed',
