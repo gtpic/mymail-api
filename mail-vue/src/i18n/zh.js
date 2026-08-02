@@ -327,7 +327,7 @@ const zh = {
     searchSender: '搜索发件人',
     userEmail: '用户邮箱',
     batchAddUser: '批量添加用户',
-    batchAddDesc: '每行一个用户，支持以下格式：\n邮箱前缀,密码（密码可含逗号，第一个逗号为分隔符）\n邮箱前缀---密码\n邮箱前缀<Tab>密码\n如果邮箱含@域名则直接使用，否则自动添加下方选择的域名',
+    batchAddDesc: '每行一个用户，支持以下格式：\n邮箱前缀,密码（密码可含逗号，第一个逗号为分隔符）\n邮箱前缀---密码\n邮箱前缀<Tab>密码\n如果邮箱含{'@'}域名则直接使用，否则自动添加下方选择的域名',
     batchAddPlaceholder: 'user1,pass123\nuser2,mypass,extra\nuser3---pass456\nuser4\tpass789\nuser5@example.com,mypass',
     batchAddProgress: '添加进度',
     batchAddSuccess: '成功',
