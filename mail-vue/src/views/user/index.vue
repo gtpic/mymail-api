@@ -228,7 +228,7 @@
     </el-dialog>
     <el-dialog v-model="showBatchAdd" :title="$t('batchAddUser')" @closed="resetBatchAddForm">
       <div class="container">
-        <div class="batch-add-desc">{{ $t('batchAddDesc') }}</div>
+        <div class="batch-add-desc" style="white-space:pre-line">{{ $t('batchAddDesc') }}</div>
         <div class="batch-domain-row">
           <el-select
               v-model="batchAddForm.suffix"
@@ -852,13 +852,32 @@ function parseBatchUsers(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0)
   const users = []
   for (const line of lines) {
-    const parts = line.split(',')
-    if (parts.length >= 2) {
-      const email = parts[0].trim()
-      const password = parts.slice(1).join(',').trim()
-      if (email && password) {
-        users.push({ email: email + batchAddForm.suffix, password })
+    let email = ''
+    let password = ''
+    // Try tab separator first
+    if (line.includes('\t')) {
+      const tabIndex = line.indexOf('\t')
+      email = line.substring(0, tabIndex).trim()
+      password = line.substring(tabIndex + 1).trim()
+    }
+    // Try --- separator
+    else if (line.includes('---')) {
+      const dashIndex = line.indexOf('---')
+      email = line.substring(0, dashIndex).trim()
+      password = line.substring(dashIndex + 3).trim()
+    }
+    // Default: comma separator (first comma is the delimiter)
+    else {
+      const commaIndex = line.indexOf(',')
+      if (commaIndex > 0) {
+        email = line.substring(0, commaIndex).trim()
+        password = line.substring(commaIndex + 1).trim()
       }
+    }
+    if (email && password) {
+      // If email already contains @ and a domain, use as-is; otherwise append selected suffix
+      const fullEmail = email.includes('@') ? email : email + batchAddForm.suffix
+      users.push({ email: fullEmail, password })
     }
   }
   return users

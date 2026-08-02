@@ -327,8 +327,8 @@ const en = {
     searchSender: 'Search by Sender',
     userEmail: 'Email Address',
     batchAddUser: 'Batch Add Users',
-    batchAddDesc: 'One user per line, format: email_prefix,password',
-    batchAddPlaceholder: 'user1,pass123\nuser2,pass456\nuser3,pass789',
+    batchAddDesc: 'One user per line, supported formats:\nemail_prefix,password (first comma is delimiter, password can contain commas)\nemail_prefix---password\nemail_prefix<Tab>password\nIf email contains @domain it will be used as-is, otherwise the domain selected below is appended',
+    batchAddPlaceholder: 'user1,pass123\nuser2,mypass,extra\nuser3---pass456\nuser4\tpass789\nuser5@example.com,mypass',
     batchAddProgress: 'Progress',
     batchAddSuccess: 'Success',
     batchAddFail: 'Failed',
@@ -340,7 +340,7 @@ const en = {
     batchAddProcessing: 'Processing...',
     emptyUserList: 'User list cannot be empty',
     emptyEmailOrPwd: 'Email or password cannot be empty',
-    batchFormatError: 'Format error, each line should be: email_prefix,password'
+    batchFormatError: 'Format error, each line should be: email_prefix,password or email_prefix---password or email_prefix<Tab>password'
 }
 
 export default en
