@@ -340,6 +340,7 @@ const zh = {
     batchAddProcessing: '正在添加中...',
     emptyUserList: '用户列表不能为空',
     emptyEmailOrPwd: '邮箱或密码不能为空',
-    batchFormatError: '格式错误，每行应为：邮箱前缀,密码 或 邮箱前缀---密码 或 邮箱前缀<Tab>密码'
+    batchFormatError: '格式错误，每行应为：邮箱前缀,密码 或 邮箱前缀---密码 或 邮箱前缀<Tab>密码',
+    batchGenEmailPwd: '批量生成邮箱/密码'
 }
 export default zh

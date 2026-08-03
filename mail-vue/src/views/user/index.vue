@@ -3,6 +3,7 @@
     <div class="header-actions">
       <Icon class="icon" icon="ion:add-outline" width="23" height="23" @click="openAdd"/>
       <Icon class="icon" icon="mdi:account-multiple-plus-outline" width="23" height="23" @click="openBatchAdd"/>
+      <a class="gen-email-link" href="https://xyrj.eu.cc/2fa#randemail" target="_blank">{{ $t('batchGenEmailPwd') }}</a>
       <div class="search">
         <el-input
             v-model="params.email"
@@ -1315,6 +1316,18 @@ function adjustWidth() {
 
   .icon {
     cursor: pointer;
+  }
+
+  .gen-email-link {
+    font-size: 13px;
+    color: var(--el-color-primary);
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 23px;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 

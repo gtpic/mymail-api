@@ -340,7 +340,8 @@ const en = {
     batchAddProcessing: 'Processing...',
     emptyUserList: 'User list cannot be empty',
     emptyEmailOrPwd: 'Email or password cannot be empty',
-    batchFormatError: 'Format error, each line should be: email_prefix,password or email_prefix---password or email_prefix<Tab>password'
+    batchFormatError: 'Format error, each line should be: email_prefix,password or email_prefix---password or email_prefix<Tab>password',
+    batchGenEmailPwd: 'Batch Generate Email/Password'
 }
 
 export default en
